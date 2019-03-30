@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const EventEmitter = require('events');
+const Event = require('./Event.js');
 
 /**
  *
@@ -109,10 +110,10 @@ class EventObserver {
             throw new TypeError(`Argument "name" to EventObserver.trigger() not a string: "${name}"`);
         }
         payload = JSON.parse(JSON.stringify(payload));
-        let event = {
+        let event = new Event({
             name,
             payload: payload.length ? (payload.length === 1 ? payload[0] : payload) : undefined
-        };
+        });
         this[PRIVATE.emitter].emit(name, event, ...payload);
     }
 
