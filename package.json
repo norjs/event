@@ -1,0 +1,33 @@
+{
+  "name": "event",
+  "version": "0.0.1",
+  "description": "Event Observer for NorJS",
+  "main": "./src/EventObserver.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "mocha": "^6.0.2",
+    "sinon": "^7.3.1"
+  },
+  "scripts": {
+    "test": "mocha test/**/*.spec.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/norjs/event.git"
+  },
+  "keywords": [
+    "event",
+    "observer"
+  ],
+  "author": "Jaakko Heusala <jheusala@iki.fi>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/norjs/event/issues"
+  },
+  "homepage": "https://github.com/norjs/event#readme"
+}
