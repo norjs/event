@@ -110,11 +110,23 @@ class EventObserver {
             throw new TypeError(`Argument "name" to EventObserver.trigger() not a string: "${name}"`);
         }
         payload = JSON.parse(JSON.stringify(payload));
+
+        const time = EventObserver.getTime();
+
         let event = new Event({
             name,
+            time,
             payload: payload.length ? (payload.length === 1 ? payload[0] : payload) : undefined
         });
+
         this[PRIVATE.emitter].emit(name, event, ...payload);
+    }
+
+    /**
+     *
+     */
+    static getTime () {
+        return (new Date()).toISOString();
     }
 
 }
