@@ -10,4 +10,5 @@
   * [ ]  Can long poll events from Event Service over UNIX socket file
   * [ ]  Can tell Event Service which events to receive
   * [x]  Initial unit test
+  * [ ]  Implement support for updating upstream event list instead of stop&start
   
