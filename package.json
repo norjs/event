@@ -15,7 +15,8 @@
     "sinon": "^7.3.1"
   },
   "scripts": {
-    "test": "mocha test/**/*.spec.js"
+    "test": "mocha test/**/*.spec.js",
+    "test-watch": "mocha --watch test/**/*.spec.js"
   },
   "repository": {
     "type": "git",
