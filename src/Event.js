@@ -1,5 +1,19 @@
-
 const _ = require('lodash');
+const TypeUtils = require("@norjs/utils/TypeUtils.js");
+
+/**
+ *
+ * @typedef {string|number|boolean} EventPayloadValue
+ */
+TypeUtils.defineType("EventPayloadValue", "string|number|boolean|null");
+
+/**
+ * The payload data should be limited to values which may not change, eg. IDs, because the order of events will not
+ * be guaranteed and observer implementations should fetch the latest data from the original API (eg. REST interface).
+ *
+ * @typedef {Object.<string, EventPayloadValue>} EventPayloadType
+ */
+TypeUtils.defineType("EventPayloadType", "Object.<string, EventPayloadValue>");
 
 /**
  * The internal data transfer object for Events.
@@ -7,13 +21,15 @@ const _ = require('lodash');
  * @typedef {Object} EventDTO
  * @property {string} name - Name of the event
  * @property {string} time - Time of the event in UTC
- * @property {string|undefined} requestId - Optional request ID which may associate the event with
- *                                          specific operation.
- * @property {*} payload - Optional payload. This should be limited to data which may not change, eg.
- *                         IDs, etc. The order of events will not be guaranteed and observer
- *                         implementations should fetch the latest data from the original API (eg.
- *                         REST interface).
+ * @property {string|undefined} [requestId] - Request ID which may associate the event with specific operation.
+ * @property {EventPayloadType} [payload] - Event payload.
  */
+TypeUtils.defineType("EventDTO", {
+    "name": "string",
+    "time": "string",
+    "requestId": "string|undefined",
+    "payload": "EventPayloadType|undefined",
+});
 
 /**
  *
@@ -24,7 +40,7 @@ const PRIVATE = {
 };
 
 /**
- *
+ * An event object model.
  */
 class Event {
 
@@ -33,15 +49,8 @@ class Event {
      * @param model {EventDTO}
      */
     constructor (model = {}) {
-
-        if (!_.isObject(model)) {
-            throw new TypeError(`Argument "model" to new Event(model) is not an object: "${model}"`);
-        }
-
-        if (!_.isString(model.name)) {
-            throw new TypeError(`Argument "model.name" to new Event(model) is not a string: "${model.name}"`);
-        }
-
+        TypeUtils.assert(model, "EventDTO");
+        TypeUtils.assert(model.name, "string");
         this[PRIVATE.model] = model;
     }
 
@@ -93,16 +102,13 @@ class Event {
      * @return {Event}
      */
     setRequestId (value) {
+        TypeUtils.assert(value, "string|undefined");
 
         if (!value) {
             if (_.has(this[PRIVATE.model], 'requestId')) {
                 delete this[PRIVATE.model].requestId;
             }
-            return;
-        }
-
-        if (!_.isString(value)) {
-            throw new TypeError(`Argument "value" to event.setRequestId(value) is not a string or undefined: "${value}"`);
+            return this;
         }
 
         this[PRIVATE.model].requestId = value;
@@ -112,7 +118,7 @@ class Event {
 
     /**
      *
-     * @returns {*}
+     * @returns {EventPayloadType}
      */
     get payload () {
         return this[PRIVATE.model].payload;
@@ -124,6 +130,7 @@ class Event {
      * @param model {Event}
      */
     static freeze (model) {
+        TypeUtils.assert(model, "Event");
         Object.freeze(model[PRIVATE.model].payload);
         Object.freeze(model[PRIVATE.model]);
         Object.freeze(model);
@@ -136,9 +143,7 @@ class Event {
      * @return {Event}
      */
     static fromString (model) {
-        if (!_.isString(model)) {
-            throw new TypeError(`Argument "model" to Event.fromString(model) is not a string: "${model}"`);
-        }
+        TypeUtils.assert(model, "string");
         return new Event(JSON.parse(model));
     }
 

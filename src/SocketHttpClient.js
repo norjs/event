@@ -1,4 +1,4 @@
-const LogicUtils = require("./LogicUtils.js");
+const LogicUtils = require("@norjs/utils/LogicUtils");
 const QUERY_STRING = require('querystring');
 
 let ENABLE_DEBUG = false;
@@ -184,7 +184,7 @@ class SocketHttpClient {
      * @param input {*}
      * @returns {Promise<any> | !Promise<*>}
      */
-    postJson (target, params = undefined, {input = undefined}) {
+    postJson (target, params = undefined, {input = undefined} = {}) {
         return this._requestJson({target, params, method: 'POST', input});
     }
 

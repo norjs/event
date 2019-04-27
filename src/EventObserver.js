@@ -1,7 +1,8 @@
 const _ = require('lodash');
 const EventEmitter = require('events');
 const Event = require('./Event.js');
-const LogicUtils = require('./LogicUtils.js');
+const LogicUtils = require("@norjs/utils/LogicUtils.js");
+const TypeUtils = require("@norjs/utils/TypeUtils.js");
 
 /**
  *
@@ -30,24 +31,26 @@ const PRIVATE = {
     emitter: Symbol('emitter'),
     fetchId: Symbol('fetchId'),
     events: Symbol('events'),
-    timeoutId: Symbol('timeoutId')
+    timeoutId: Symbol('timeoutId'),
+    setEventsPromise: Symbol('setEventsPromise'),
+    setEventsRescheduled: Symbol('setEventsRescheduled')
 };
 
 /**
- *
+ * Implementation for observing and triggering events.
  */
 class EventObserver {
 
     /**
      *
-     * @param service {SocketEventService} Upstream event service
+     * @param service {EventService} Upstream event service
      */
     constructor ({
         service = undefined
     }={}) {
 
-        if (!(_.isString(service) || service === undefined)) {
-            throw new TypeError(`Argument "service" to new EventObserver() was not a string or undefined: "${service}"`);
+        if (service !== undefined) {
+            TypeUtils.assert(service, "EventService");
         }
 
         /**
@@ -72,6 +75,20 @@ class EventObserver {
         this[PRIVATE.timeoutId] = undefined;
 
         /**
+         * Current .setEvents() promise
+         *
+         * @member {Promise}
+         */
+        this[PRIVATE.setEventsPromise] = undefined;
+
+        /**
+         * True if .setEvents() has been scheduled to happen again after this[PRIVATE.setEventsPromise]
+         *
+         * @member {boolean}
+         */
+        this[PRIVATE.setEventsRescheduled] = false;
+
+        /**
          * Events which should be listened at upstream
          *
          * @member {string}
@@ -92,6 +109,19 @@ class EventObserver {
          */
         this._delayedStart = _.debounce(() => this._start(), UPSTREAM_START_DELAY);
 
+    }
+
+    /**
+     * Set upstream event service.
+     *
+     * @param service {EventService} Upstream event service
+     */
+    setService (service) {
+        TypeUtils.assert(service, "EventService");
+        this[PRIVATE.service] = service;
+        if (this[PRIVATE.events].length) {
+            this._delayedStart();
+        }
     }
 
     /**
@@ -144,8 +174,8 @@ class EventObserver {
 
         const events = this[PRIVATE.events];
         this[PRIVATE.service].start(events).then(payload => {
+            TypeUtils.assert(payload, "StartResponseDTO");
             this[PRIVATE.fetchId] = payload.fetchId;
-
             this._startPolling();
 
         }).catch(err => {
@@ -200,31 +230,71 @@ class EventObserver {
     }
 
     /**
+     * Add new events to listen for in the upstream.
      *
      * @param names {Array.<string>} The event names to listen at upstream
      * @private
      */
     _addToEvents (names) {
 
-        if (!_.isArray(names)) {
-            throw new TypeError(`Argument "names" to EventObserver.trigger() not an array: "${names}"`);
-        }
+        TypeUtils.assert(names, "Array.<string>");
 
-        // Ignore if we don't have upstream
+        // Ignore if we don't have upstream event service
         if (!this[PRIVATE.service]) return;
 
         const events = this[PRIVATE.events];
-
         const newEvents = _.filter(names, name => !_.find(events, name));
 
-        // Ignore if we already listen each
+        // Ignore if we already listen each event
         if (!newEvents.length) return;
 
         _.each(newEvents, name => {
             events.push(name);
         });
 
-        this._delayedStart();
+        this._setUpstreamEvents();
+    }
+
+    /**
+     * Starts a call to set events array in the upstream, or schedules one later.
+     *
+     * @private
+     */
+    _setUpstreamEvents () {
+
+        const events = this[PRIVATE.events];
+
+        // Schedule a start if we don't have a fetch id yet
+        if (!this[PRIVATE.fetchId]) {
+            this._delayedStart();
+            return;
+        }
+
+        // Ignore if already re-scheduled
+        if (this[PRIVATE.setEventsRescheduled]) {
+            return;
+        }
+
+        // Schedule later setEvents if one is already in progress
+        if (this[PRIVATE.setEventsPromise]) {
+            this[PRIVATE.setEventsPromise].finally( () => this._setUpstreamEvents() );
+            this[PRIVATE.setEventsRescheduled] = true;
+            return;
+        }
+
+        // Reset upstream array
+        const fetchId = this[PRIVATE.fetchId];
+        this[PRIVATE.setEventsPromise] = this[PRIVATE.service].setEvents(fetchId, events).catch(err => {
+            console.error('Error: ', err);
+            console.info('Scheduling restart because of an error in setting upstream event.');
+            this._delayedStart();
+        }).finally(() => {
+            if (this[PRIVATE.setEventsPromise]) {
+                this[PRIVATE.setEventsPromise] = undefined;
+            }
+            this[PRIVATE.setEventsRescheduled] = false;
+        });
+
     }
 
     /**
@@ -234,9 +304,7 @@ class EventObserver {
      */
     _removeFromEvents (names) {
 
-        if (!_.isArray(names)) {
-            throw new TypeError(`Argument "names" to EventObserver.trigger() not an array: "${names}"`);
-        }
+        TypeUtils.assert(names, "Array.<string>");
 
         // Ignore if we don't have upstream
         if (!this[PRIVATE.service]) return;
@@ -264,9 +332,8 @@ class EventObserver {
      */
     on (name, listener) {
 
-        if (!_.isFunction(listener)) {
-            throw new TypeError(`Argument "listener" to EventObserver.on() not a function: "${listener}"`);
-        }
+        TypeUtils.assert(name, "string|Array.<string>");
+        TypeUtils.assert(listener, "function");
 
         if (_.isString(name)) {
 
@@ -315,26 +382,27 @@ class EventObserver {
      * Trigger an event.
      *
      * @param name {string}
-     * @param payload {*}
+     * @param payload {EventPayloadType}
      */
-    trigger (name, ...payload) {
-        if (!_.isString(name)) {
-            throw new TypeError(`Argument "name" to EventObserver.trigger() not a string: "${name}"`);
+    trigger (name, payload) {
+        TypeUtils.assert(name, "string");
+        if (payload !== undefined) {
+            TypeUtils.assert(payload, "EventPayloadType");
+            payload = JSON.parse(JSON.stringify(payload));
         }
-        payload = JSON.parse(JSON.stringify(payload));
 
         const time = EventObserver.getTime();
 
-        let event = new Event({
+        const event = new Event({
             name,
             time,
-            payload: payload.length ? (payload.length === 1 ? payload[0] : payload) : undefined
+            payload
         });
 
         this[PRIVATE.emitter].emit(name, event, event.payload);
 
         if (this[PRIVATE.service]) {
-            this[PRIVATE.service].trigger(event).catch(err => {
+            this[PRIVATE.service].trigger([event]).catch(err => {
                 console.error('Failed to trigger event upstream: ', err);
             });
         }
@@ -342,6 +410,7 @@ class EventObserver {
 
     /**
      *
+     * @return {string}
      */
     static getTime () {
         return (new Date()).toISOString();

@@ -1,11 +1,19 @@
 const _ = require('lodash');
 const sinon = require('sinon');
 const assert = require('assert');
+const TypeUtils = require('@norjs/utils/TypeUtils.js');
 
+/**
+ *
+ * @type {typeof EventObserver}
+ */
 const EventObserver = require('../src/EventObserver.js');
 
 describe('EventObserver', () => {
 
+    /**
+     * @type {EventObserver}
+     */
     let observer;
 
     before(() => {
@@ -28,12 +36,19 @@ describe('EventObserver', () => {
 
         it('can trigger events with payload', () => {
             const EVENT_NAME = 'foobar';
-            const payload = "1234qwerty";
+
+            /**
+             *
+             * @type {EventPayloadType}
+             */
+            const payload = {
+                "value": "1234qwerty"
+            };
             const listener = sinon.stub();
             observer.on(EVENT_NAME, listener);
             assert(!listener.called);
             observer.trigger(EVENT_NAME, payload);
-            assert(_.isObject(listener.args[0][0]));
+            TypeUtils.assert(listener.args[0][0], "{name: string, payload: string}");
             assert(_.isEqual(listener.args[0][0].name, EVENT_NAME));
             assert(_.isEqual(listener.args[0][0].payload, payload));
             assert(_.isEqual(listener.args[0][1], payload));

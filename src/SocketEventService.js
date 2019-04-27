@@ -1,5 +1,6 @@
 const Event = require('./Event.js');
 const EventService = require('./EventService.js');
+const TypeUtils = require("@norjs/utils/TypeUtils.js");
 
 /**
  *
@@ -11,17 +12,21 @@ const PRIVATE = {
 };
 
 /**
- * Implements an interface to EventService over an UNIX socket.
+ * Implements EventService over an UNIX socket.
  *
+ * @implements {EventService}
  */
-class SocketEventService extends EventService {
+class SocketEventService {
 
     /**
      *
      * @param socket {SocketHttpClient}
+     * @param events {Array.<string>}
      */
-    constructor (socket) {
-        super();
+    constructor (socket, events) {
+
+        TypeUtils.assert(socket, "SocketHttpClient");
+        TypeUtils.assert(events, "Array.<string>");
 
         /**
          * @member {SocketHttpClient}
@@ -33,7 +38,7 @@ class SocketEventService extends EventService {
          *
          * @member {Array.<string>}
          */
-        this[PRIVATE.events] = events;
+        this[PRIVATE.events] = _.map(events, e => e);
 
     }
 
@@ -43,17 +48,37 @@ class SocketEventService extends EventService {
      * Resolves successfully if the EventService has successfully taken responsibility of the event,
      * otherwise rejects the promise.
      *
-     * @param event {Event}
-     * @returns {Promise}
-     * @abstract
+     * @param events {Array.<Event>}
+     * @returns {Promise.<TriggerEventServiceResponse>}
      */
-    trigger (event) {
-        const payload = event.valueOf();
+    trigger (events) {
+        TypeUtils.assert(events, "Array.<Event>");
+
+        const names = _.map(events, e => e.name);
+        /**
+         *
+         * @type {TriggerEventServiceRequestDTO}
+         */
+        const payload = {
+            events: _.map(events, e => e.valueOf())
+        };
         return this[PRIVATE.socket].postJson(
             '/trigger',
-            {name: event.name},
+            {name: names.join(' ')},
             {
                 input: payload
+            }
+        ).then(
+            /**
+             *
+             * @param response {TriggerEventServiceResponseDTO}
+             * @returns {TriggerEventServiceResponse}
+             */
+            response => {
+                TypeUtils.assert(response, "TriggerEventServiceResponseDTO");
+                return {
+                    events: _.map(response.events, event => new Event(event))
+                };
             }
         );
     }
@@ -61,57 +86,101 @@ class SocketEventService extends EventService {
     /**
      * Start to listen event names which the upstream should relay to us.
      *
-     * @param events {Array.<{fetchId:string}>}
-     * @returns {Promise.<string>} Promise of polling ID
-     * @abstract
+     * @param events {Array.<string>}
+     * @returns {Promise.<StartEventServiceResponseDTO>} Promise of a response
      */
     start (events) {
-        const payload = _.map(events, e => {
-            if (!_.isString(e)) {
-                throw new TypeError(`Item in "events" argument to SocketEventService.start() was not an string: "${e}"`);
-            }
-            return e;
-        });
+        TypeUtils.assert(events, "Array.<string>");
+
+        /**
+         *
+         * @type {StartEventServiceRequestDTO}
+         */
+        const payload = {
+            events: _.map(events, e => e)
+        };
         return this[PRIVATE.socket].postJson(
             '/start',
             {},
             {
                 input: payload
             }
-        );
+        ).then(response => {
+            TypeUtils.assert(response, "StartEventServiceResponseDTO");
+            return response;
+        });
     }
 
     /**
      * Set event names which the upstream should relay to us.
      *
      * @param fetchId {string} Fetch ID you got from .start()
-     * @returns {Promise}
-     * @abstract
+     * @returns {Promise.<StopEventServiceResponseDTO>}
      */
     stop (fetchId) {
-        if (!_.isString(fetchId)) {
-            throw new TypeError(`Argument "fetchId" argument to SocketEventService.stop(fetchId) was not an string: "${fetchId}"`);
-        }
+        TypeUtils.assert(fetchId, "string");
         return this[PRIVATE.socket].postJson(
             '/stop',
             {fetchId}
-        );
+        ).then(response => {
+            TypeUtils.assert(response, "StopEventServiceResponseDTO");
+            return response;
+        });
     }
 
     /**
      * Long poll for an array of events.
      *
      * @param fetchId {string} Fetch ID you got from .start()
-     * @returns {Promise.<{events: Array.<Event>}>} Array of received events, otherwise empty array.
-     * @abstract
+     * @returns {Promise.<FetchEventServiceResponse>} Array of received events, otherwise empty array.
      */
     fetchEvents (fetchId) {
-        if (!_.isString(fetchId)) {
-            throw new TypeError(`Argument "fetchId" argument to SocketEventService.fetchEvents(fetchId) was not an string: "${fetchId}"`);
-        }
+        TypeUtils.assert(fetchId, "string");
         return this[PRIVATE.socket].getJson('/fetchEvents', {fetchId}).then(
-            payload => _.map(payload.events, e => new Event(e))
+            /**
+             *
+             * @param response {FetchEventServiceResponseDTO}
+             * @returns {FetchEventServiceResponse}
+             */
+            response => {
+                TypeUtils.assert(response, "FetchEventServiceResponseDTO");
+                return {
+                    fetchId: response.fetchId,
+                    events: _.map(response.events, event => new Event(event))
+                };
+            }
         );
+    }
+
+    /**
+     * Set events which the upstream should return to us.
+     *
+     * @param fetchId {string} Fetch ID you got from .start()
+     * @param events {Array.<string>}
+     * @returns {Promise.<SetEventServiceResponseDTO>}
+     */
+    setEvents (fetchId, events) {
+        TypeUtils.assert(fetchId, "string");
+        TypeUtils.assert(events, "Array.<string>");
+
+        /**
+         *
+         * @type {SetEventServiceRequestDTO}
+         */
+        const payload = {
+            events: _.map(events, e => e)
+        };
+
+        return this[PRIVATE.socket].postJson(
+            '/setEvents',
+            {fetchId},
+            {
+                input: payload
+            }
+        ).then(response => {
+            TypeUtils.assert(response, "SetEventServiceResponseDTO");
+            return response;
+        });
     }
 
 }
