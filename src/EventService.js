@@ -1,5 +1,6 @@
 const TypeUtils = require('@norjs/utils/TypeUtils.js');
 
+
 /**
  * @typedef {Object} TriggerEventServiceRequestDTO
  * @property events {Array.<Event>}
@@ -24,6 +25,7 @@ TypeUtils.defineType("TriggerEventServiceResponse",  {
     "events": "Array.<Event>"
 });
 
+
 /**
  * @typedef {Object} StartEventServiceRequestDTO
  * @property {Array.<string>}  events - Event names which were started
@@ -42,6 +44,7 @@ TypeUtils.defineType("StartEventServiceResponseDTO", {
     "events": "Array.<string>"
 });
 
+
 /**
  * @typedef {Object} StopEventServiceResponseDTO
  * @property {string} fetchId - The fetch ID which this operation affected
@@ -50,23 +53,25 @@ TypeUtils.defineType("StopEventServiceResponseDTO", {
     "fetchId": "string"
 });
 
+
 /**
- * @typedef {Object} SetEventServiceRequestDTO
+ * @typedef {Object} SetEventsServiceRequestDTO
  * @property {Array.<string>}  events - Event names which to set
  */
-TypeUtils.defineType("SetEventServiceRequestDTO", {
+TypeUtils.defineType("SetEventsServiceRequestDTO", {
     "events": "Array.<string>"
 });
 
 /**
- * @typedef {Object} SetEventServiceResponseDTO
+ * @typedef {Object} SetEventsServiceResponseDTO
  * @property         {string}  fetchId - The fetch ID which this operation affected
  * @property {Array.<string>}  events - Event names which were set
  */
-TypeUtils.defineType("SetEventServiceResponseDTO", {
+TypeUtils.defineType("SetEventsServiceResponseDTO", {
     "fetchId": "string",
     "events": "Array.<string>"
 });
+
 
 /**
  * @typedef {Object} FetchEventServiceResponseDTO
@@ -87,6 +92,7 @@ TypeUtils.defineType("FetchEventServiceResponse", {
     "fetchId": "string",
     "events": "Array.<Event>"
 });
+
 
 /**
  * An interface for EventServices.
@@ -111,7 +117,7 @@ class EventService {
      *
      * @param fetchId {string} Fetch ID you got from .start()
      * @param events {Array.<string>}
-     * @returns {Promise.<SetEventServiceResponseDTO>}
+     * @returns {Promise.<SetEventsServiceResponseDTO>}
      */
     setEvents (fetchId, events) {}
 
@@ -141,5 +147,10 @@ class EventService {
 
 }
 
-// Exports
+TypeUtils.defineType("EventService", TypeUtils.classToObjectPropertyTypes(EventService));
+
+/**
+ *
+ * @type {typeof EventService}
+ */
 module.exports = EventService;

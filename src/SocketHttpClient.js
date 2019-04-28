@@ -1,4 +1,5 @@
-const LogicUtils = require("@norjs/utils/LogicUtils");
+const LogicUtils = require("@norjs/utils/LogicUtils.js");
+const TypeUtils = require("@norjs/utils/TypeUtils.js");
 const QUERY_STRING = require('querystring');
 
 let ENABLE_DEBUG = false;
@@ -32,6 +33,8 @@ class SocketHttpClient {
      * @param http {module:http} Node.js HTTP module
      */
     constructor ({socket, http} = {}) {
+        TypeUtils.assert(socket, "string");
+        TypeUtils.assert(http, "object");
         this._socket = socket;
         this._http = http;
     }
@@ -57,6 +60,7 @@ class SocketHttpClient {
      * @param target {string} The target path, eg. `"/libvirt/hooks/qemu"`.
      * @param method {string} The HTTP method as a string.
      * @param params {{}} Optional query parameters.
+     * @param inputString {string}
      * @return {Promise}
      * @protected
      */
@@ -66,6 +70,12 @@ class SocketHttpClient {
                         params = undefined,
                         inputString = undefined
                     }) {
+
+        TypeUtils.assert(target, "string");
+        TypeUtils.assert(method, "string");
+        if (params !== undefined) TypeUtils.assert(params, "{}");
+        if (inputString !== undefined) TypeUtils.assert(inputString, "string");
+
         const path = params ? `${target}?${QUERY_STRING.stringify(params)}` : target;
 
         const socketPath = this._socket;
@@ -174,6 +184,8 @@ class SocketHttpClient {
      * @returns {Promise}
      */
     getJson (target, params = undefined) {
+        TypeUtils.assert(target, "string");
+        if (params !== undefined) TypeUtils.assert(params, "{}");
         return this._requestJson({target, params, method: 'GET'});
     }
 
@@ -185,27 +197,34 @@ class SocketHttpClient {
      * @returns {Promise<any> | !Promise<*>}
      */
     postJson (target, params = undefined, {input = undefined} = {}) {
+        TypeUtils.assert(target, "string");
+        if (params !== undefined) TypeUtils.assert(params, "{}");
         return this._requestJson({target, params, method: 'POST', input});
     }
 
     /**
      *
      * @param buffer {Buffer|*}
-     * @returns {*}
+     * @returns {string|*}
      */
     static parseToJson (buffer) {
         if (buffer instanceof Buffer) {
-            return LogicUtils.tryCatch( () => {
-                if (this.isDebugEnabled()) console.debug(`Going to parse ${buffer.length} bytes.`);
-                const stringData = buffer.toString('utf8');
-                if (this.isDebugEnabled()) console.debug(`Parsed: "${stringData}"`);
-                return JSON.parse(stringData);
-            }, err => Promise.reject(err));
+            // return LogicUtils.tryCatch( () => {
+            if (this.isDebugEnabled()) console.debug(`Going to parse ${buffer.length} bytes.`);
+            const stringData = buffer.toString('utf8');
+            if (this.isDebugEnabled()) console.debug(`Parsed: "${stringData}"`);
+            return JSON.parse(stringData);
+            // }, err => Promise.reject(err));
         }
         return buffer;
     }
 
 }
 
-// Exports
+TypeUtils.defineType("SocketHttpClient", TypeUtils.classToTestType(SocketHttpClient));
+
+/**
+ *
+ * @type {typeof SocketHttpClient}
+ */
 module.exports = SocketHttpClient;

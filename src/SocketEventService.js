@@ -1,5 +1,21 @@
+const _ = require('lodash');
+
+/**
+ *
+ * @type {typeof Event}
+ */
 const Event = require('./Event.js');
+
+/**
+ *
+ * @type {typeof EventService}
+ */
 const EventService = require('./EventService.js');
+
+/**
+ *
+ * @type {typeof TypeUtils}
+ */
 const TypeUtils = require("@norjs/utils/TypeUtils.js");
 
 /**
@@ -55,6 +71,7 @@ class SocketEventService {
         TypeUtils.assert(events, "Array.<Event>");
 
         const names = _.map(events, e => e.name);
+
         /**
          *
          * @type {TriggerEventServiceRequestDTO}
@@ -62,6 +79,7 @@ class SocketEventService {
         const payload = {
             events: _.map(events, e => e.valueOf())
         };
+
         return this[PRIVATE.socket].postJson(
             '/trigger',
             {name: names.join(' ')},
@@ -136,7 +154,7 @@ class SocketEventService {
      */
     fetchEvents (fetchId) {
         TypeUtils.assert(fetchId, "string");
-        return this[PRIVATE.socket].getJson('/fetchEvents', {fetchId}).then(
+        return this[PRIVATE.socket].postJson('/fetchEvents', {fetchId}).then(
             /**
              *
              * @param response {FetchEventServiceResponseDTO}
@@ -157,7 +175,7 @@ class SocketEventService {
      *
      * @param fetchId {string} Fetch ID you got from .start()
      * @param events {Array.<string>}
-     * @returns {Promise.<SetEventServiceResponseDTO>}
+     * @returns {Promise.<SetEventsServiceResponseDTO>}
      */
     setEvents (fetchId, events) {
         TypeUtils.assert(fetchId, "string");
@@ -165,7 +183,7 @@ class SocketEventService {
 
         /**
          *
-         * @type {SetEventServiceRequestDTO}
+         * @type {SetEventsServiceRequestDTO}
          */
         const payload = {
             events: _.map(events, e => e)
@@ -178,12 +196,17 @@ class SocketEventService {
                 input: payload
             }
         ).then(response => {
-            TypeUtils.assert(response, "SetEventServiceResponseDTO");
+            TypeUtils.assert(response, "SetEventsServiceResponseDTO");
             return response;
         });
     }
 
 }
 
-// Exports
+TypeUtils.defineType("SocketEventService", TypeUtils.classToTestType(SocketEventService));
+
+/**
+ *
+ * @type {typeof SocketEventService}
+ */
 module.exports = SocketEventService;

@@ -384,8 +384,9 @@ class EventObserver {
      * @param name {string}
      * @param payload {EventPayloadType}
      */
-    trigger (name, payload) {
+    trigger (name, payload = undefined) {
         TypeUtils.assert(name, "string");
+
         if (payload !== undefined) {
             TypeUtils.assert(payload, "EventPayloadType");
             payload = JSON.parse(JSON.stringify(payload));
@@ -398,6 +399,8 @@ class EventObserver {
             time,
             payload
         });
+
+        // console.log('event: ', event.valueOf());
 
         this[PRIVATE.emitter].emit(name, event, event.payload);
 
@@ -418,5 +421,10 @@ class EventObserver {
 
 }
 
-// Exports
+TypeUtils.defineType("EventObserver", TypeUtils.classToTestType(EventObserver));
+
+/**
+ *
+ * @type {typeof EventObserver}
+ */
 module.exports = EventObserver;

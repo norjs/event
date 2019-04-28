@@ -149,5 +149,10 @@ class Event {
 
 }
 
-// Exports
+TypeUtils.defineType("Event", TypeUtils.classToTestType(Event));
+
+/**
+ *
+ * @type {typeof Event}
+ */
 module.exports = Event;
