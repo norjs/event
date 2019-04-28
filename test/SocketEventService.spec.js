@@ -6,7 +6,7 @@ const assert = require('assert');
  *
  * @type {typeof TypeUtils}
  */
-const TypeUtils = require('@norjs/utils/TypeUtils.js');
+const TypeUtils = require('@norjs/utils/Type');
 
 /**
  *

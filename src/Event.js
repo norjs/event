@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const TypeUtils = require("@norjs/utils/TypeUtils.js");
+const TypeUtils = require("@norjs/utils/Type");
 
 /**
  *

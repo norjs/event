@@ -1,5 +1,4 @@
-const TypeUtils = require('@norjs/utils/TypeUtils.js');
-
+const TypeUtils = require('@norjs/utils/Type');
 
 /**
  * @typedef {Object} TriggerEventServiceRequestDTO

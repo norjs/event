@@ -1,8 +1,8 @@
 const _ = require('lodash');
 const EventEmitter = require('events');
 const Event = require('./Event.js');
-const LogicUtils = require("@norjs/utils/LogicUtils.js");
-const TypeUtils = require("@norjs/utils/TypeUtils.js");
+const LogicUtils = require("@norjs/utils/Logic");
+const TypeUtils = require("@norjs/utils/Type");
 
 /**
  *

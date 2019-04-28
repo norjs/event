@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const sinon = require('sinon');
 const assert = require('assert');
-const TypeUtils = require('@norjs/utils/TypeUtils.js');
+const TypeUtils = require('@norjs/utils/Type');
 
 /**
  *

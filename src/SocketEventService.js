@@ -16,7 +16,7 @@ const EventService = require('./EventService.js');
  *
  * @type {typeof TypeUtils}
  */
-const TypeUtils = require("@norjs/utils/TypeUtils.js");
+const TypeUtils = require("@norjs/utils/Type");
 
 /**
  *

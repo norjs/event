@@ -1,5 +1,5 @@
-const LogicUtils = require("@norjs/utils/LogicUtils.js");
-const TypeUtils = require("@norjs/utils/TypeUtils.js");
+const LogicUtils = require("@norjs/utils/Logic");
+const TypeUtils = require("@norjs/utils/Type");
 const QUERY_STRING = require('querystring');
 
 let ENABLE_DEBUG = false;
