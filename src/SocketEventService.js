@@ -2,6 +2,18 @@ const _ = require('lodash');
 
 /**
  *
+ * @type {{stop: string, fetchEvents: string, start: string, trigger: string, setEvents: string}}
+ */
+const ROUTES = {
+    trigger: '/trigger',
+    start: '/start',
+    stop: '/stop',
+    fetchEvents: '/fetchEvents',
+    setEvents: '/setEvents'
+};
+
+/**
+ *
  * @type {typeof Event}
  */
 const Event = require('./Event.js');
@@ -81,7 +93,7 @@ class SocketEventService {
         };
 
         return this[PRIVATE.socket].postJson(
-            '/trigger',
+            ROUTES.trigger,
             {name: names.join(' ')},
             {
                 input: payload
@@ -118,7 +130,7 @@ class SocketEventService {
             events: _.map(events, e => e)
         };
         return this[PRIVATE.socket].postJson(
-            '/start',
+            ROUTES.start,
             {},
             {
                 input: payload
@@ -138,7 +150,7 @@ class SocketEventService {
     stop (fetchId) {
         TypeUtils.assert(fetchId, "string");
         return this[PRIVATE.socket].postJson(
-            '/stop',
+            ROUTES.stop,
             {fetchId}
         ).then(response => {
             TypeUtils.assert(response, "StopEventServiceResponseDTO");
@@ -154,7 +166,10 @@ class SocketEventService {
      */
     fetchEvents (fetchId) {
         TypeUtils.assert(fetchId, "string");
-        return this[PRIVATE.socket].postJson('/fetchEvents', {fetchId}).then(
+        return this[PRIVATE.socket].postJson(
+            ROUTES.fetchEvents,
+            {fetchId}
+        ).then(
             /**
              *
              * @param response {FetchEventServiceResponseDTO}
@@ -190,7 +205,7 @@ class SocketEventService {
         };
 
         return this[PRIVATE.socket].postJson(
-            '/setEvents',
+            ROUTES.setEvents,
             {fetchId},
             {
                 input: payload

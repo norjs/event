@@ -1,4 +1,8 @@
-const TypeUtils = require('@norjs/utils/Type');
+/**
+ *
+ * @type {typeof TypeUtils}
+ */
+const TypeUtils = require("@norjs/utils/Type");
 
 /**
  * @typedef {Object} TriggerEventServiceRequestDTO
@@ -101,7 +105,7 @@ TypeUtils.defineType("FetchEventServiceResponse", {
 class EventService {
 
     /**
-     * Trigger an event(s) at upstream.
+     * Trigger event(s) at upstream.
      *
      * Resolves successfully if the EventService has successfully taken responsibility of the event,
      * otherwise rejects the promise.

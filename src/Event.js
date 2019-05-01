@@ -1,4 +1,9 @@
 const _ = require('lodash');
+
+/**
+ *
+ * @type {typeof TypeUtils}
+ */
 const TypeUtils = require("@norjs/utils/Type");
 
 /**
