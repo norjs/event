@@ -97,7 +97,7 @@ class SocketEventService {
              */
             response => {
                 TypeUtils.assert(response, "TriggerEventServiceResponseDTO");
-                console.log('WOOT response: ', response);
+                // console.log('WOOT response: ', response);
                 return {
                     events: _.map(response.events || [], event => new Event(event))
                 };
