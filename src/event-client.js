@@ -126,7 +126,11 @@ LogicUtils.tryCatch( () => {
 			name: eventName,
 			payload: index < TRIGGER_PAYLOADS.length ? TRIGGER_PAYLOADS[index] : undefined
 		}));
-		return service.trigger(events).catch(err => handleError(err));
+		return service.trigger(events).then(result => {
+			if (VERBOSE) {
+				console.log(JSON.stringify(result, null, 2));
+			}
+		}).catch(err => handleError(err));
 	}
 
 	if (WAIT_EVENTS.length) {
@@ -141,7 +145,7 @@ LogicUtils.tryCatch( () => {
 
 				if (events.length) {
 					_.forEach(events, event => {
-						console.log(event.toJSON());
+						console.log(JSON.stringify(event));
 					});
 				} else {
 					process.exit(10);
