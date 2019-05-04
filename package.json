@@ -6,6 +6,9 @@
   "directories": {
     "test": "test"
   },
+  "bin": {
+    "nor-event": "./src/event-client.js"
+  },
   "dependencies": {
     "@norjs/utils": "^1.0.2",
     "lodash": "^4.17.11",

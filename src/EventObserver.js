@@ -111,6 +111,7 @@ class EventObserver {
 
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Set upstream event service.
      *

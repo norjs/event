@@ -1,7 +1,23 @@
-const LogicUtils = require("@norjs/utils/Logic");
-const TypeUtils = require("@norjs/utils/Type");
-const QUERY_STRING = require('querystring');
+// Interfaces
+require('./interfaces/HttpClientModule.js');
+require('./interfaces/QueryStringModule.js');
 
+/**
+ *
+ * @member {typeof LogicUtils}
+ */
+const LogicUtils = require("@norjs/utils/Logic");
+
+/**
+ *
+ * @member {typeof TypeUtils}
+ */
+const TypeUtils = require("@norjs/utils/Type");
+
+/**
+ *
+ * @type {boolean}
+ */
 let ENABLE_DEBUG = false;
 
 /**
@@ -11,32 +27,37 @@ class SocketHttpClient {
 
     /**
      *
-     * @param value {boolean}
-     * @public
-     */
-    static setDebugEnabled (value) {
-        ENABLE_DEBUG = !!value;
-    }
-
-    /**
-     *
-     * @returns {boolean}
-     * @public
-     */
-    static isDebugEnabled () {
-        return ENABLE_DEBUG;
-    }
-
-    /**
-     *
      * @param socket {string} The socket file for nor-kvm-service
-     * @param http {module:http} Node.js HTTP module
+     * @param httpModule {HttpClientModule} Node.js 'http' module
+     * @param queryStringModule {QueryStringModule} Node.js 'querystring' module
      */
-    constructor ({socket, http} = {}) {
+    constructor ({
+        socket,
+        httpModule,
+        queryStringModule
+    } = {}) {
+
         TypeUtils.assert(socket, "string");
-        TypeUtils.assert(http, "object");
+        TypeUtils.assert(httpModule, "HttpClientModule");
+        TypeUtils.assert(queryStringModule, "QueryStringModule");
+
+        /**
+         *
+         * @member {string}
+         * @private
+         */
         this._socket = socket;
-        this._http = http;
+
+        /**
+         * @member {HttpClientModule}
+         */
+        this._http = httpModule;
+
+        /**
+         * @member {QueryStringModule}
+         */
+        this._queryString = queryStringModule;
+
     }
 
     /**
@@ -76,7 +97,7 @@ class SocketHttpClient {
         if (params !== undefined) TypeUtils.assert(params, "{}");
         if (inputString !== undefined) TypeUtils.assert(inputString, "string");
 
-        const path = params ? `${target}?${QUERY_STRING.stringify(params)}` : target;
+        const path = params ? `${target}?${this._queryString.stringify(params)}` : target;
 
         const socketPath = this._socket;
 
@@ -85,6 +106,11 @@ class SocketHttpClient {
         return new Promise((resolve, reject) => {
             LogicUtils.tryCatch( () => {
                 if (this.isDebugEnabled()) console.log(`Calling request "${method} ${path}" from "${socketPath}"...`);
+
+                /**
+                 *
+                 * @type {HttpClientRequestObject}
+                 */
                 const req = this._http.request({
                     method,
                     path,
@@ -94,14 +120,13 @@ class SocketHttpClient {
                         if (this.isDebugEnabled()) console.log('Got response. Parsing.');
 
                         const statusCode = res.statusCode;
+                        const isSuccess = statusCode >= 200 && statusCode < 400;
                         const body = [];
                         res.on('data', (chunk) => {
                             LogicUtils.tryCatch( () => body.push(chunk), reject);
                         });
                         res.on('end', () => {
                             LogicUtils.tryCatch( () => {
-
-                                const isSuccess = statusCode >= 200 && statusCode < 400;
 
                                 if (this.isDebugEnabled()) console.log(`Response ended as ${statusCode} with ${body.length} chunks.`);
 
@@ -155,6 +180,7 @@ class SocketHttpClient {
         );
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      *
      * @param target {string}
@@ -166,6 +192,7 @@ class SocketHttpClient {
         return this._requestBuffer({target, params, method: 'GET'});
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      *
      * @param target {string}
@@ -177,6 +204,7 @@ class SocketHttpClient {
         return this._requestBuffer({target, params, method: 'POST'});
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      *
      * @param target {string}
@@ -217,6 +245,25 @@ class SocketHttpClient {
             // }, err => Promise.reject(err));
         }
         return buffer;
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     *
+     * @param value {boolean}
+     * @public
+     */
+    static setDebugEnabled (value) {
+        ENABLE_DEBUG = !!value;
+    }
+
+    /**
+     *
+     * @returns {boolean}
+     * @public
+     */
+    static isDebugEnabled () {
+        return ENABLE_DEBUG;
     }
 
 }

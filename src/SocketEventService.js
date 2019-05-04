@@ -49,24 +49,15 @@ class SocketEventService {
     /**
      *
      * @param socket {SocketHttpClient}
-     * @param events {Array.<string>}
      */
-    constructor (socket, events) {
+    constructor (socket) {
 
         TypeUtils.assert(socket, "SocketHttpClient");
-        TypeUtils.assert(events, "Array.<string>");
 
         /**
          * @member {SocketHttpClient}
          */
         this[PRIVATE.socket] = socket;
-
-        /**
-         * Event names which upstream should tell us.
-         *
-         * @member {Array.<string>}
-         */
-        this[PRIVATE.events] = _.map(events, e => e);
 
     }
 

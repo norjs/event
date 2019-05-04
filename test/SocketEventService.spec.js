@@ -27,12 +27,11 @@ describe('SocketEventService', () => {
      *
      * @type {SocketHttpClient}
      */
-    class SocketHttpClient {
+    class SocketHttpClientMock {
         postJson () {}
-        getJson () {}
     }
 
-    TypeUtils.defineType("SocketHttpClient", TypeUtils.classToObjectPropertyTypes(SocketHttpClient));
+    TypeUtils.defineType("SocketHttpClient", TypeUtils.classToObjectPropertyTypes(SocketHttpClientMock));
 
     let socket;
     let events;
@@ -43,7 +42,7 @@ describe('SocketEventService', () => {
     let service;
 
     beforeEach(() => {
-        socket = new SocketHttpClient();
+        socket = new SocketHttpClientMock();
         events = [
             "foo",
             "bar"
@@ -107,7 +106,7 @@ describe('SocketEventService', () => {
 
                 assert.strictEqual( socket.postJson.args[0][2].input.events.length, 1);
                 assert.strictEqual( socket.postJson.args[0][2].input.events[0].name, eventName);
-                assert.strictEqual( socket.postJson.args[0][2].input.events[0].time, eventTime)
+                assert.strictEqual( socket.postJson.args[0][2].input.events[0].time, eventTime);
 
                 TypeUtils.assert(response, "TriggerEventServiceResponse");
                 assert.strictEqual( response.events.length, 1);
