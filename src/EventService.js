@@ -6,7 +6,7 @@ const TypeUtils = require("@norjs/utils/Type");
 
 /**
  * @typedef {Object} TriggerEventServiceRequestDTO
- * @property events {Array.<Event>}
+ * @property events {EventDTO[]}
  */
 TypeUtils.defineType("TriggerEventServiceRequestDTO",  {
     "events": "Array.<EventDTO>"

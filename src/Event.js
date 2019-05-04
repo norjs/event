@@ -53,10 +53,16 @@ class Event {
      *
      * @param model {EventDTO}
      */
-    constructor (model = {}) {
+    constructor (model) {
+
         TypeUtils.assert(model, "EventDTO");
         TypeUtils.assert(model.name, "string");
+
+        /**
+         * @member {EventDTO}
+         */
         this[PRIVATE.model] = model;
+
     }
 
     /**
@@ -73,7 +79,15 @@ class Event {
      * @returns {string}
      */
     toString () {
-        return JSON.stringify(this[PRIVATE.model]);
+        return `Event:${TypeUtils.stringify(this[PRIVATE.model])}`;
+    }
+
+    /**
+     *
+     * @returns {EventDTO}
+     */
+    toJSON () {
+        return this[PRIVATE.model];
     }
 
     /**
