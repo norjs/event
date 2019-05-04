@@ -16,6 +16,12 @@ const VERBOSE_ARG = '--verbose';
 const TRIGGER_PREFIX_ARG = '--trigger=';
 
 /**
+ *
+ * @type {string}
+ */
+const WAIT_PREFIX_ARG = '--wait=';
+
+/**
  * @type {string[]}
  */
 const ARGS = process.argv.slice(2);
@@ -29,6 +35,11 @@ const VERBOSE = _.some(ARGS, arg => arg === VERBOSE_ARG);
  * @type {Array.<string>}
  */
 const TRIGGER_EVENTS = _.filter(ARGS, arg => _.startsWith(arg, TRIGGER_PREFIX_ARG)).map(a => a.substr(TRIGGER_PREFIX_ARG.length));
+
+/**
+ * @type {Array.<string>}
+ */
+const WAIT_EVENTS = _.filter(ARGS, arg => _.startsWith(arg, WAIT_PREFIX_ARG)).map(a => a.substr(WAIT_PREFIX_ARG.length));
 
 /**
  *
@@ -94,8 +105,79 @@ LogicUtils.tryCatch( () => {
 		return service.trigger(events).catch(err => handleError(err));
 	}
 
+	if (WAIT_EVENTS.length) {
+		return service.start(WAIT_EVENTS).then(
+			result => fetchEventsAndStop(service, result)
+		).then(
+			/**
+			 *
+			 * @param events {Array.<Event>}
+			 */
+			events => {
+
+				_.forEach(events, event => {
+					console.log(event.toJSON());
+				});
+
+		}).catch(err => handleError(err));
+	}
+
 }, err => handleError(err));
 
+/**
+ *
+ * @param service {SocketEventService}
+ * @param result {StartEventServiceResponseDTO}
+ * @returns {Promise.<Array.<Event>>}
+ */
+function fetchEventsAndStop (service, result) {
+
+	// console.log('WOOT: fetchEvents: ', result);
+
+	const events = [];
+
+	/**
+	 *
+	 * @type {string}
+	 */
+	const fetchId = result.fetchId;
+
+	return service.fetchEvents(fetchId).then(
+		/**
+		 *
+		 * @param fetchResult {FetchEventServiceResponse}
+		 */
+		fetchResult => {
+
+			// console.log('WOOT: fetchResult: ', fetchResult);
+
+			if (fetchResult.events && fetchResult.events.length) {
+				_.forEach(fetchResult.events, event => {
+					events.push(event);
+				});
+			}
+
+			return service.stop(fetchId).then(stopResult => {
+
+				if (stopResult.events && stopResult.events.length) {
+					_.forEach(stopResult.events, event => {
+						events.push(event);
+					});
+				}
+
+				// console.log('WOOT: stopResult: ', stopResult);
+
+				return events;
+			});
+
+		}
+	);
+}
+
+/**
+ *
+ * @param err
+ */
 function handleError (err) {
 
 	console.error(`Exception: ${TypeUtils.toString(err)}`);

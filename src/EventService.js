@@ -49,13 +49,22 @@ TypeUtils.defineType("StartEventServiceResponseDTO", {
 
 
 /**
+ * @typedef {Object} StopEventServiceResponse
+ * @property {string} fetchId - The fetch ID which this operation affected
+ */
+TypeUtils.defineType("StopEventServiceResponse", {
+    "fetchId": "string",
+    "events": "Array.<Event>"
+});
+
+/**
  * @typedef {Object} StopEventServiceResponseDTO
  * @property {string} fetchId - The fetch ID which this operation affected
  */
 TypeUtils.defineType("StopEventServiceResponseDTO", {
-    "fetchId": "string"
+    "fetchId": "string",
+    "events": "Array.<EventDTO>"
 });
-
 
 /**
  * @typedef {Object} SetEventsServiceRequestDTO
