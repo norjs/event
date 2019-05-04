@@ -139,9 +139,13 @@ LogicUtils.tryCatch( () => {
 			 */
 			events => {
 
-				_.forEach(events, event => {
-					console.log(event.toJSON());
-				});
+				if (events.length) {
+					_.forEach(events, event => {
+						console.log(event.toJSON());
+					});
+				} else {
+					process.exit(10);
+				}
 
 		}).catch(err => handleError(err));
 	}
