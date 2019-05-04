@@ -10,3 +10,27 @@ it possibly connect to multiple top level event servers and services running on 
 
 Communication between the library and local service is implemented using long polling HTTP over 
 local UNIX socket file.
+
+### Install
+
+`npm install @norjs/event`
+
+### Usage
+
+### Command line usage
+
+Wait for an event:
+
+```
+if NODE_CONNECT=/path/to/socket.sock nor-event --wait=foo; then
+  echo Event happened
+else
+  echo Timeout happened
+fi
+```
+
+Trigger an event:
+
+```
+NODE_CONNECT=/path/to/socket.sock nor-event --trigger=foo --payload='{"hello":"world"}'
+```
