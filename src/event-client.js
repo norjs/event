@@ -19,6 +19,12 @@ const TRIGGER_PREFIX_ARG = '--trigger=';
  *
  * @type {string}
  */
+const PAYLOAD_PREFIX_ARG = '--payload=';
+
+/**
+ *
+ * @type {string}
+ */
 const WAIT_PREFIX_ARG = '--wait=';
 
 /**
@@ -34,7 +40,12 @@ const VERBOSE = _.some(ARGS, arg => arg === VERBOSE_ARG);
 /**
  * @type {Array.<string>}
  */
-const TRIGGER_EVENTS = _.filter(ARGS, arg => _.startsWith(arg, TRIGGER_PREFIX_ARG)).map(a => a.substr(TRIGGER_PREFIX_ARG.length));
+const TRIGGER_EVENTS = _.filter(
+	ARGS,
+	arg => _.startsWith(arg, TRIGGER_PREFIX_ARG)
+).map(
+	a => a.substr(TRIGGER_PREFIX_ARG.length)
+);
 
 /**
  * @type {Array.<string>}
@@ -54,6 +65,16 @@ const TypeUtils = require("@norjs/utils/Type");
 const LogicUtils = require('@norjs/utils/Logic');
 
 LogicUtils.tryCatch( () => {
+
+	/**
+	 * @type {Array.<*>}
+	 */
+	const TRIGGER_PAYLOADS = _.filter(
+		ARGS,
+		arg => _.startsWith(arg, PAYLOAD_PREFIX_ARG)
+	).map(
+		a => JSON.parse(a.substr(PAYLOAD_PREFIX_ARG.length))
+	);
 
 	// Interfaces
 	require('./interfaces/HttpClientModule.js');
@@ -101,7 +122,10 @@ LogicUtils.tryCatch( () => {
 	const service = new SocketEventService(socket);
 
 	if (TRIGGER_EVENTS.length) {
-		const events = _.map(TRIGGER_EVENTS, eventName => new Event({name: eventName}));
+		const events = _.map(TRIGGER_EVENTS, (eventName, index) => new Event({
+			name: eventName,
+			payload: index < TRIGGER_PAYLOADS.length ? TRIGGER_PAYLOADS[index] : undefined
+		}));
 		return service.trigger(events).catch(err => handleError(err));
 	}
 
