@@ -1,7 +1,7 @@
 # NorJS Event Observer Library
 
 This is a library which implements an interface to trigger and listen events from 
-(https://github.com/norjs/event-service)[The NorJS Event Service].
+[The NorJS Event Service](https://github.com/norjs/event-service).
 
 ### Design
 
