@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@norjs/utils": "^1.0.4",
+    "@norjs/socket": "^1.0.5",
     "lodash": "^4.17.11",
     "moment": "^2.24.0"
   },

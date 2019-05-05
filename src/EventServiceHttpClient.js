@@ -40,11 +40,11 @@ const PRIVATE = {
 };
 
 /**
- * Implements EventService over an UNIX socket.
+ * Implements EventService interface over an UNIX socket.
  *
  * @implements {EventService}
  */
-class SocketEventService {
+class EventServiceHttpClient {
 
     /**
      *
@@ -210,10 +210,10 @@ class SocketEventService {
 
 }
 
-TypeUtils.defineType("SocketEventService", TypeUtils.classToTestType(SocketEventService));
+TypeUtils.defineType("EventServiceHttpClient", TypeUtils.classToTestType(EventServiceHttpClient));
 
 /**
  *
- * @type {typeof SocketEventService}
+ * @type {typeof EventServiceHttpClient}
  */
-module.exports = SocketEventService;
+module.exports = EventServiceHttpClient;

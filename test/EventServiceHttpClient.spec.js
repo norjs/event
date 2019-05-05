@@ -16,11 +16,11 @@ const Event = require('../src/Event.js');
 
 /**
  *
- * @type {typeof SocketEventService}
+ * @type {typeof EventServiceHttpClient}
  */
-const SocketEventService = require('../src/SocketEventService.js');
+const EventServiceHttpClient = require('../src/EventServiceHttpClient.js');
 
-describe('SocketEventService', () => {
+describe('EventServiceHttpClient', () => {
 
     /**
      * Mock of SocketHttpClient
@@ -37,7 +37,7 @@ describe('SocketEventService', () => {
     let events;
 
     /**
-     * @type {SocketEventService}
+     * @type {EventServiceHttpClient}
      */
     let service;
 
@@ -47,7 +47,7 @@ describe('SocketEventService', () => {
             "foo",
             "bar"
         ];
-        service = new SocketEventService(socket, events);
+        service = new EventServiceHttpClient(socket, events);
     });
 
     afterEach(() => {

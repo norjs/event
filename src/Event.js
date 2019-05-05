@@ -1,4 +1,3 @@
-const _ = require('lodash');
 
 /**
  *
@@ -25,13 +24,13 @@ TypeUtils.defineType("EventPayloadType", "Object.<string, EventPayloadValue>");
  *
  * @typedef {Object} EventDTO
  * @property {string} name - Name of the event
- * @property {string} time - Time of the event in UTC
+ * @property {string|undefined} [time] - Time of the event in UTC
  * @property {string|undefined} [requestId] - Request ID which may associate the event with specific operation.
- * @property {EventPayloadType} [payload] - Event payload.
+ * @property {EventPayloadType|undefined} [payload] - Event payload.
  */
 TypeUtils.defineType("EventDTO", {
     "name": "string",
-    "time": "string",
+    "time": "string|undefined",
     "requestId": "string|undefined",
     "payload": "EventPayloadType|undefined",
 });
@@ -112,27 +111,6 @@ class Event {
      */
     get requestId () {
         return this[PRIVATE.model].requestId;
-    }
-
-    /**
-     * Set optional request ID.
-     *
-     * @param value {string|undefined}
-     * @return {Event}
-     */
-    setRequestId (value) {
-        TypeUtils.assert(value, "string|undefined");
-
-        if (!value) {
-            if (_.has(this[PRIVATE.model], 'requestId')) {
-                delete this[PRIVATE.model].requestId;
-            }
-            return this;
-        }
-
-        this[PRIVATE.model].requestId = value;
-
-        return this;
     }
 
     /**

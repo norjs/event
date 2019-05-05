@@ -77,31 +77,37 @@ LogicUtils.tryCatch( () => {
 	);
 
 	// Interfaces
-	require('./interfaces/HttpClientModule.js');
+	require('@norjs/socket/src/interfaces/HttpClientModule.js');
 
 	/**
 	 *
 	 * @type {HttpClientModule}
 	 */
-	const HTTP = require('http');
+	const httpModule = require('http');
 
 	/**
 	 *
-	 * @type {typeof SocketEventService}
+	 * @type {typeof EventServiceHttpClient}
 	 */
-	const SocketEventService = require('./SocketEventService.js');
+	const EventServiceHttpClient = require('./EventServiceHttpClient.js');
 
 	/**
 	 *
 	 * @type {typeof SocketHttpClient}
 	 */
-	const SocketHttpClient = require('./SocketHttpClient.js');
+	const SocketHttpClient = require('@norjs/socket/src/SocketHttpClient.js');
 
 	/**
 	 *
 	 * @type {typeof Event}
 	 */
 	const Event = require('./Event.js');
+
+	/**
+	 *
+	 * @type {QueryStringModule}
+	 */
+	const queryStringModule = require('querystring');
 
 	/**
 	 *
@@ -115,17 +121,25 @@ LogicUtils.tryCatch( () => {
 
 	const socket = new SocketHttpClient({
 		socket: NODE_CONNECT,
-		httpModule: HTTP,
-		queryStringModule: require('querystring')
+		httpModule,
+		queryStringModule
 	});
 
-	const service = new SocketEventService(socket);
+	const service = new EventServiceHttpClient(socket);
 
 	if (TRIGGER_EVENTS.length) {
-		const events = _.map(TRIGGER_EVENTS, (eventName, index) => new Event({
-			name: eventName,
-			payload: index < TRIGGER_PAYLOADS.length ? TRIGGER_PAYLOADS[index] : undefined
-		}));
+		const events = _.map(TRIGGER_EVENTS,
+			/**
+			 *
+			 * @param eventName {string}
+			 * @param index {number}
+			 * @returns {Event}
+			 */
+			(eventName, index) => new Event({
+				name: eventName,
+				payload: index < TRIGGER_PAYLOADS.length ? TRIGGER_PAYLOADS[index] : undefined
+			})
+		);
 		return service.trigger(events).then(result => {
 			if (VERBOSE) {
 				console.log(JSON.stringify(result, null, 2));
@@ -158,7 +172,7 @@ LogicUtils.tryCatch( () => {
 
 /**
  *
- * @param service {SocketEventService}
+ * @param service {EventServiceHttpClient}
  * @param result {StartEventServiceResponseDTO}
  * @returns {Promise.<Array.<Event>>}
  */
@@ -212,7 +226,7 @@ function fetchEventsAndStop (service, result) {
  */
 function handleError (err) {
 
-	console.error(`Exception: ${TypeUtils.toString(err)}`);
+	console.error(`Exception: ${TypeUtils.stringify(err)}`);
 
 	if (VERBOSE && err.stack) {
 		console.error(err.stack);
