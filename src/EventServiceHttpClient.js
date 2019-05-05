@@ -1,5 +1,8 @@
 const _ = require('lodash');
 
+// Interfaces
+require('@norjs/socket/src/interfaces/HttpClient.js');
+
 /**
  *
  * @type {{stop: string, fetchEvents: string, start: string, trigger: string, setEvents: string}}
@@ -32,15 +35,14 @@ const TypeUtils = require("@norjs/utils/Type");
 
 /**
  *
- * @type {{socket: Symbol}}
+ * @type {{client: Symbol}}
  */
 const PRIVATE = {
-    socket: Symbol('socket'),
-    events: Symbol('events')
+    client: Symbol('client')
 };
 
 /**
- * Implements EventService interface over an UNIX socket.
+ * Implements EventService interface over an HTTP client.
  *
  * @implements {EventService}
  */
@@ -48,16 +50,16 @@ class EventServiceHttpClient {
 
     /**
      *
-     * @param socket {SocketHttpClient}
+     * @param client {HttpClient}
      */
-    constructor (socket) {
+    constructor (client) {
 
-        TypeUtils.assert(socket, "SocketHttpClient");
+        TypeUtils.assert(client, "HttpClient");
 
         /**
-         * @member {SocketHttpClient}
+         * @member {HttpClient}
          */
-        this[PRIVATE.socket] = socket;
+        this[PRIVATE.client] = client;
 
     }
 
@@ -83,7 +85,7 @@ class EventServiceHttpClient {
             events: _.map(events, e => e.valueOf())
         };
 
-        return this[PRIVATE.socket].postJson(
+        return this[PRIVATE.client].postJson(
             ROUTES.trigger,
             {name: names.join(' ')},
             {
@@ -121,7 +123,7 @@ class EventServiceHttpClient {
         const payload = {
             events: _.map(events, e => e)
         };
-        return this[PRIVATE.socket].postJson(
+        return this[PRIVATE.client].postJson(
             ROUTES.start,
             {},
             {
@@ -141,7 +143,7 @@ class EventServiceHttpClient {
      */
     stop (fetchId) {
         TypeUtils.assert(fetchId, "string");
-        return this[PRIVATE.socket].postJson(
+        return this[PRIVATE.client].postJson(
             ROUTES.stop,
             {fetchId}
         ).then(response => {
@@ -158,7 +160,7 @@ class EventServiceHttpClient {
      */
     fetchEvents (fetchId) {
         TypeUtils.assert(fetchId, "string");
-        return this[PRIVATE.socket].postJson(
+        return this[PRIVATE.client].postJson(
             ROUTES.fetchEvents,
             {fetchId}
         ).then(
@@ -196,7 +198,7 @@ class EventServiceHttpClient {
             events: _.map(events, e => e)
         };
 
-        return this[PRIVATE.socket].postJson(
+        return this[PRIVATE.client].postJson(
             ROUTES.setEvents,
             {fetchId},
             {
