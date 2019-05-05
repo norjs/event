@@ -1,7 +1,7 @@
 {
   "name": "@norjs/event",
-  "version": "1.0.4",
-  "description": "NorJS Event Observer",
+  "version": "1.0.5",
+  "description": "NorJS Event observer and client support",
   "main": "./src/EventObserver.js",
   "directories": {
     "test": "test"
