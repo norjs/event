@@ -1,6 +1,6 @@
 {
   "name": "@norjs/event",
-  "version": "1.0.10",
+  "version": "1.0.14",
   "description": "NorJS Event observer and client support",
   "main": "./src/EventObserver.js",
   "directories": {
@@ -10,8 +10,9 @@
     "nor-event": "./src/event-client.js"
   },
   "dependencies": {
-    "@norjs/socket": "^1.0.10",
-    "@norjs/utils": "^1.0.10",
+    "@norjs/types": "^1.0.14",
+    "@norjs/socket": "^1.0.14",
+    "@norjs/utils": "^1.0.14",
     "lodash": "^4.17.15",
     "moment": "^2.24.0"
   },

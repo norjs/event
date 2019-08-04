@@ -1,7 +1,7 @@
 const _ = require('lodash');
 
 // Interfaces
-require('@norjs/socket/src/interfaces/HttpClient.js');
+require('@norjs/types/interfaces/HttpClient.js');
 
 /**
  *
